@@ -3,34 +3,16 @@
 #include <iostream>
 #include <string>
 #include <thread>
-
+#include <sys/mman.h>   
+#include <fcntl.h>
+#include <unistd.h>
 #include "capture_digit.h"
 #include "digit_cnn.h"
 #include "fpga_gemm_backend.h"
 
-#define IOWR(base, offset, data) (*((volatile uint32_t *)((base) + (offset))) = (data))
-typedef unsigned char  alt_u8;
-
-
-
 void cleanup() {
     gemm_backend_cleanup();
 }
-
-static void sevenseg_set_dec(int dec)
-{
-    static alt_u8 segments[10] = {
-        0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7C, 0x07, 0x7F, 0x67}; /* 0-9 */
-
-    int tens_place = dec / 10;
-    int ones_place = dec % 10;
-
-    unsigned int data = segments[ones_place] | (segments[tens_place] << 8);
-
-    IOWR(0x40, 0, data);
-}
-
-
 
 int main(int argc, char** argv) {
     try {
@@ -79,8 +61,7 @@ int main(int argc, char** argv) {
 
             print_vector(result.log_probs, "LogSoftmax output");
             std::cout << "Predicted digit: " << result.pred << "\n";
-            sevenseg_set_dec(result.pred);
-
+            display_led(cap, result.pred);
             ++iter;
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }

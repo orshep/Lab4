@@ -332,11 +332,11 @@ bool gemm_backend_run_fpga(const std::vector<float>& A,
     int input_elements = K;       // input_size in kernel
     int output_elements = M * N;  // output_size in kernel
 
-    status  = clSetKernelArg(g_kernel, 0, sizeof(cl_mem), &buf_A);      // input
-    status |= clSetKernelArg(g_kernel, 1, sizeof(cl_mem), &buf_B);      // weights
-    status |= clSetKernelArg(g_kernel, 2, sizeof(int), &input_elements); // input_size
-    status |= clSetKernelArg(g_kernel, 3, sizeof(int), &output_elements);// output_size
-    status |= clSetKernelArg(g_kernel, 4, sizeof(cl_mem), &buf_C);      // output
+    status = clSetKernelArg(g_kernel, 0, sizeof(cl_mem), (void*) &buf_A);      // input
+    status |= clSetKernelArg(g_kernel, 1, sizeof(cl_mem), (void*) &buf_B);      // weights
+    status |= clSetKernelArg(g_kernel, 2, sizeof(int), (void*) &input_elements); // input_size
+    status |= clSetKernelArg(g_kernel, 3, sizeof(int), (void*) &output_elements);// output_size
+    status |= clSetKernelArg(g_kernel, 4, sizeof(cl_mem), (void*) &buf_C);      // output
 
     if (status != CL_SUCCESS) {
         std::cerr << "gemm_backend_run_fpga: clSetKernelArg failed, status = "
